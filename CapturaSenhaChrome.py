@@ -32,6 +32,7 @@ import sqlite3
 import os
 import getpass
 import datetime
+import platform
  
 # Cria classe generica de uma WX.Grid
 # A classe abaixo faz parte da documentação WXPython oficial
@@ -121,7 +122,7 @@ class Formulario(wx.Frame):
         self.SetMenuBar(menubarra)
 
         # Barra de status
-        statusbar = self.CreateStatusBar(4)
+        statusbar = self.CreateStatusBar(5)
 
         # Retorna data
         dataA = datetime.datetime.today()
@@ -131,7 +132,8 @@ class Formulario(wx.Frame):
         self.SetStatusText("Estação: " + os.environ['COMPUTERNAME'],0)
         self.SetStatusText("Usuario: " + getpass.getuser(), 1)
         self.SetStatusText("Data Atual: " + dataA, 2)
-        self.SetStatusText("Desenvolvimento Aberto - 2014", 3)
+        self.SetStatusText(self.plataforma(), 3)
+        self.SetStatusText("Desenvolvimento Aberto - 2014", 4)
 
         # Declara Eventos dos menus
         self.Bind(wx.EVT_MENU, self.OnSalvar, id=5000)
@@ -144,6 +146,12 @@ class Formulario(wx.Frame):
         grid.SetColSize(1, 230)
         grid.SetColSize(2, 108)
 
+    def plataforma(self):
+        sistema = "OS: " + platform.system() + \
+                  " - " + platform.release() + \
+                  " - " + platform.version()
+        return sistema
+
     # Cria evento para Salvar Arquivo.
     def OnSalvar(self, evt):
         saveFileDialog = wx.FileDialog(self, "Salvar Como", "", "",
@@ -154,11 +162,16 @@ class Formulario(wx.Frame):
 
         # Cria arquivo e adiciona conteudo
         arquivo = saveFileDialog.GetPath()
-        
+
         file = open(arquivo, "w")
-        
-        conteudo = "Google Chrome Password Recovery - Powered by Desenvolvimento Aberto 2014\n\n"
-        
+
+        conteudo = "Google Chrome Password Recovery - Powered by Desenvolvimento Aberto 2014\n\n" + \
+                   "Sistema Operacional: " + self.plataforma().replace("OS:","") + "\n" + \
+                   "Estação: " + os.environ['COMPUTERNAME'] + "\n" + \
+                   "Usuario: " + getpass.getuser() + "\n" + \
+                   "Data Extração: " + datetime.datetime.today().strftime('%d-%b-%Y') + "\n\n" + \
+                   "Registros encontrados: \n\n"
+
         for reg in dados:
             conteudo = conteudo + str(reg) + "\n"
         file.write(str(conteudo))
@@ -187,5 +200,6 @@ app = wx.App()
 frame = Formulario(None)
 frame.Show(True)
 app.MainLoop()
+
 
 
