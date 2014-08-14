@@ -1,15 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
-# Desenvolvimento Aberto
 # CapturaSenhaChrome.py
-
-#The MIT License (MIT)
+ 
+# The MIT License (MIT)
 #
-#[OSI Approved License] 
-#
-#The MIT License (MIT)
-#
-#Copyright (c) 2014 - Desenvolvimento Aberto
+# Copyright (c) 2014 - Desenvolvimento Aberto
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +15,7 @@
 #
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-
+ 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,63 +23,65 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-  
+ 
 # importa modulos
 import wx
 import wx.grid
 import win32crypt
 import sqlite3
-from os import getenv
-
+import os
+import getpass
+import datetime
+ 
 # Cria classe generica de uma WX.Grid
-# A classe abaixo faz parte da documentaÁ„o WXPython oficial
-# Este trecho de cÛdigo È util para manipular a grade
-  
+# A classe abaixo faz parte da documenta√ß√£o WXPython oficial
+# Este trecho de c√≥digo √© util para manipular a grade
+ 
 class GenericTable(wx.grid.PyGridTableBase):
     def __init__(self, data, rowLabels=None, colLabels=None):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
         self.rowLabels = rowLabels
         self.colLabels = colLabels
-  
+ 
     def GetNumberRows(self):
         return len(self.data)
-  
+ 
     def GetNumberCols(self):
         return len(self.data[0])
-  
+ 
     def GetColLabelValue(self, col):
         if self.colLabels:
             return self.colLabels[col]
-  
+ 
     def GetRowLabelValue(self, row):
         if self.rowLabels:
             return self.rowLabels[row]
-  
+ 
     def IsEmptyCell(self, row, col):
         return False
-  
+ 
     def GetValue(self, row, col):
         return self.data[row][col]
-  
+ 
     def SetValue(self, row, col, value):
-        pass    
-  
+        pass   
+ 
 # Inicializa Grade
 dados = []
-colLabels  = ["Site", "Usuario", "senha"]
+colLabels  = ["Site (Action URL)", "Usu√°rio (User)", "Senha (Password)"]
 rowLabels = []
 for linha in range(1,150):
     rowLabels.append(str(linha))
-
+ 
 # Conecta ao banco de dados do usuario local
-# Requer elevaÁ„o de privilefios se o Chrome estiver aberto
-conn = sqlite3.connect(getenv("APPDATA") + "\..\Local\Google\Chrome\User Data\Default\Login Data")
+# Requer eleva√ß√£o de privilegios se o Chrome estiver aberto
+conn = sqlite3.connect(os.getenv("APPDATA") + "\..\Local\Google\Chrome\User Data\Default\Login Data")
 cursor = conn.cursor()
-
-# Captura informaÁıes de login
+ 
+# Captura informa√ß√µes de login
 cursor.execute('SELECT action_url, username_value, password_value FROM logins')
-
+ 
 # Retorna resultados
 resultado = cursor.fetchall()
 for result in resultado:
@@ -94,29 +91,94 @@ for result in resultado:
   if senha:
       captura = [result[0], result[1], senha]
       dados.append(captura)
-
+ 
 # Cria classe da grid
 class SimpleGrid(wx.grid.Grid):
     def __init__(self, parent):
-        wx.grid.Grid.__init__(self, parent, -1, pos=(5,60), size=(850,200))
+        wx.grid.Grid.__init__(self, parent, -1, pos=(5,10), size=(850,240))
         tableBase = GenericTable(dados, rowLabels, colLabels)
         self.SetTable(tableBase)                   
  
 # Cria formulario
 class Formulario(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, -1, "Desenvolvimento Aberto - Captura Senha - Google Chrome", size=(900, 350))
+        # Cria Formulario
+        wx.Frame.__init__(self, parent, -1, "Google Chrome Password Recovery", size=(880, 350))
         panel = wx.Panel(self, wx.ID_ANY)
-        label=wx.StaticText(panel, -1, label='Chrome - Captura sites e decifra senhas - Powred by Desenvolvimento Aberto', pos=(300,20))
+
+        # Cria Menu
+        menu = wx.Menu()
+        menu.Append(5000, "S&alvar")
+        menu.Append(5001, "Sai&r")
+
+        menu1 = wx.Menu()
+        menu1.Append(6001, "&Sobre", "Informa√ß√£o sobre este programa")
+
+        # Cria Barra de menus
+        menubarra = wx.MenuBar()
+        menubarra.Append(menu, "&Arquivo")
+        menubarra.Append(menu1, "&Sobre")
+        self.SetMenuBar(menubarra)
+
+        # Barra de status
+        statusbar = self.CreateStatusBar(4)
+
+        # Retorna data
+        dataA = datetime.datetime.today()
+        dataA = dataA.strftime('%d-%b-%Y')
+
+        # Set today date in the second field
+        self.SetStatusText("Esta√ß√£o: " + os.environ['COMPUTERNAME'],0)
+        self.SetStatusText("Usuario: " + getpass.getuser(), 1)
+        self.SetStatusText("Data Atual: " + dataA, 2)
+        self.SetStatusText("Desenvolvimento Aberto - 2014", 3)
+
+        # Declara Eventos dos menus
+        self.Bind(wx.EVT_MENU, self.OnSalvar, id=5000)
+        self.Bind(wx.EVT_MENU, self.OnSair, id=5001)
+        self.Bind(wx.EVT_MENU, self.OnSobre, id=6001)
+
+        # Cria Grid de dados
         grid = SimpleGrid(panel)
-        grid.SetColSize(0, 430);
-        grid.SetColSize(1, 230);
-        grid.SetColSize(2, 100);
+        grid.SetColSize(0, 430)
+        grid.SetColSize(1, 230)
+        grid.SetColSize(2, 108)
+
+    # Cria evento para Salvar Arquivo.
+    def OnSalvar(self, evt):
+        saveFileDialog = wx.FileDialog(self, "Salvar Como", "", "",
+                                       "Arquivos Texto (*.txt)|*.txt",
+                                       wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+
+        if saveFileDialog.ShowModal() == wx.ID_CANCEL: return
+
+        # Cria arquivo e adiciona conteudo
+        arquivo = saveFileDialog.GetPath()
+        file = open(arquivo, "w")
+        file.write(str(dados))
+        file.close()
+        saveFileDialog.Destroy()
+
+    # Cria evento de saida
+    def OnSair(self, evt):
+        self.Close(True)
+
+    # Cria evento sobre
+    def OnSobre(self, evt):
+        # Cria texto para ferramenta
+        texto = "Powered by Desenvolvimento Aberto\n\n" + \
+                "Autor: Ricardo Mantovani\n" + \
+                "E-mail: desenvolvimento.aberto@live.com\n" + \
+                "Vers√£o: 1.1 - Betha\n\n" + \
+                "Coogle Code:\n"+ \
+                "http://code.google.com/p/google-chome-pass-recovery"
+        # Cria caixa de texto
+        msg = wx.MessageBox(texto, 'Info', wx.OK | wx.ICON_INFORMATION)
+        msg.ShowModal()
  
-# Inicializa a aplicaÁ„o
-app = wx.PySimpleApp()
+# Inicializa a aplica√ß√£o
+app = wx.App()
 frame = Formulario(None)
 frame.Show(True)
 app.MainLoop()
 
-        
