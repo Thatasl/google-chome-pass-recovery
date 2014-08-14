@@ -154,8 +154,14 @@ class Formulario(wx.Frame):
 
         # Cria arquivo e adiciona conteudo
         arquivo = saveFileDialog.GetPath()
+        
         file = open(arquivo, "w")
-        file.write(str(dados))
+        
+        conteudo = "Google Chrome Password Recovery - Powered by Desenvolvimento Aberto 2014\n\n"
+        
+        for reg in dados:
+            conteudo = conteudo + str(reg) + "\n"
+        file.write(str(conteudo))
         file.close()
         saveFileDialog.Destroy()
 
@@ -181,4 +187,5 @@ app = wx.App()
 frame = Formulario(None)
 frame.Show(True)
 app.MainLoop()
+
 
