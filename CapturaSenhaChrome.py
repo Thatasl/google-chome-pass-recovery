@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
+# Versão 1.3 - Betha
 # CapturaSenhaChrome.py
  
 # The MIT License (MIT)
 #
-# Copyright (c) 2014 - Desenvolvimento Aberto
+# Copyright (c) 2014 - Ricardo Mantovani - Desenvolvimento Aberto
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +39,9 @@ import platform
 # A classe abaixo faz parte da documentação WXPython oficial
 # Este trecho de código é util para manipular a grade
  
+
 class GenericTable(wx.grid.PyGridTableBase):
-    def __init__(self, data, rowLabels=None, colLabels=None):
+    def __init__(self, data, rowLabels = None, colLabels = None):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = data
         self.rowLabels = rowLabels
@@ -70,9 +72,9 @@ class GenericTable(wx.grid.PyGridTableBase):
  
 # Inicializa Grade
 dados = []
-colLabels  = ["Site (Action URL)", "Usuário (User)", "Senha (Password)"]
+colLabels = ["Site (Action URL)", "Usuário (User)", "Senha (Password)"]
 rowLabels = []
-for linha in range(1,150):
+for linha in range(1, 150):
     rowLabels.append(str(linha))
  
 # Conecta ao banco de dados do usuario local
@@ -96,24 +98,26 @@ for result in resultado:
 # Cria classe da grid
 class SimpleGrid(wx.grid.Grid):
     def __init__(self, parent):
-        wx.grid.Grid.__init__(self, parent, -1, pos=(5,10), size=(850,240))
+        wx.grid.Grid.__init__(self, parent, -1, pos=(5, 10), size=(850, 240))
         tableBase = GenericTable(dados, rowLabels, colLabels)
         self.SetTable(tableBase)                   
  
 # Cria formulario
+
+
 class Formulario(wx.Frame):
     def __init__(self, parent):
         # Cria Formulario
-        wx.Frame.__init__(self, parent, -1, "Google Chrome Password Recovery", size=(880, 350))
+        wx.Frame.__init__(self, parent, -1, "DA - Google Chrome Password Recovery - Desenvolvimento Aberto - 2014", size=(880, 350))
         panel = wx.Panel(self, wx.ID_ANY)
 
         # Cria Menu
         menu = wx.Menu()
-        menu.Append(5000, "S&alvar")
-        menu.Append(5001, "Sai&r")
+        menu.Append(5000, "S&alvar", "Exportar para texto")
+        menu.Append(5001, "Sai&r", "Fechar o programa")
 
         menu1 = wx.Menu()
-        menu1.Append(6001, "&Sobre", "Informação sobre este programa")
+        menu1.Append(6001, "&Sobre", "Sobre este programa")
 
         # Cria Barra de menus
         menubarra = wx.MenuBar()
@@ -128,12 +132,12 @@ class Formulario(wx.Frame):
         dataA = datetime.datetime.today()
         dataA = dataA.strftime('%d-%b-%Y')
 
-        # Set today date in the second field
-        self.SetStatusText("Estação: " + os.environ['COMPUTERNAME'],0)
-        self.SetStatusText("Usuario: " + getpass.getuser(), 1)
-        self.SetStatusText("Data Atual: " + dataA, 2)
-        self.SetStatusText(self.plataforma(), 3)
-        self.SetStatusText("Desenvolvimento Aberto - 2014", 4)
+        # Preenche barra de status
+        self.SetStatusText("", 0)
+        self.SetStatusText("Estação: " + os.environ['COMPUTERNAME'], 1)
+        self.SetStatusText("Usuario: " + getpass.getuser(), 2)
+        self.SetStatusText("Data Atual: " + dataA, 3)
+        self.SetStatusText(self.plataforma(), 4)
 
         # Declara Eventos dos menus
         self.Bind(wx.EVT_MENU, self.OnSalvar, id=5000)
@@ -189,7 +193,7 @@ class Formulario(wx.Frame):
                 "Autor: Ricardo Mantovani\n" + \
                 "E-mail: desenvolvimento.aberto@live.com\n" + \
                 "Versão: 1.1 - Betha\n\n" + \
-                "Coogle Code:\n"+ \
+                "Coogle Code:\n" + \
                 "http://code.google.com/p/google-chome-pass-recovery"
         # Cria caixa de texto
         msg = wx.MessageBox(texto, 'Info', wx.OK | wx.ICON_INFORMATION)
@@ -200,6 +204,7 @@ app = wx.App()
 frame = Formulario(None)
 frame.Show(True)
 app.MainLoop()
+
 
 
 
